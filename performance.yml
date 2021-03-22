@@ -1,0 +1,53 @@
+
+config:
+  target: "https://api.todoist.com"
+  phases:
+    - duration: 2
+      arrivalRate: 1
+      name: "Test 1"
+  defaults:
+    headers:
+      Authorization: Bearer {{$processEnvironment.ENV}}
+      Content-type: application/json
+  payload:
+   path: "C:/Users/elizabeth.perez/Desktop/ArtilleryE/Variables/Customer-Data.csv"
+   fields:
+      - "projectname"
+      - "taskname"
+scenarios:
+  - flow:
+      - post:
+          url: "/rest/v1/projects"
+          json:
+           name: "{{ projectname }}"
+          capture:
+           json: "$.id"
+           as: "projectId"
+      - log: "Current ProjectID {{ projectId }}"
+      - post:
+          url: "/rest/v1/tasks"
+          json:
+           content: "{{ taskname }}"
+           project_id: "{{ projectId }}"
+          capture:
+           json: "$.id"
+           as: "taskId"
+      - log: "Current TaskID {{ taskId }}"
+      - get:
+          url: "/rest/v1/tasks/{{ taskId }}"
+      - get:
+          url: "/rest/v1/tasks"
+      - post:
+          url: "/rest/v1/tasks/{{ taskId }}"
+          json:
+           content: Task Eli Updated
+      - post:
+          url: "/rest/v1/tasks/{{ taskId }}/close"
+      - post:
+          url: "/rest/v1/tasks/{{ taskId }}/reopen"
+      - delete:
+          url: "/rest/v1/tasks/{{ taskId }}"
+
+
+
+          
